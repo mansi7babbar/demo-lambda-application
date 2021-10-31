@@ -31,17 +31,17 @@ public class RestaurantAppTest extends LocalStackTest {
         assertThat(postRestaurantResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK);
     }
 
-//    @Test
-//    public void testGetRestaurantRequest() throws IOException {
-//        HttpPost postRestaurantRequest = new HttpPost(restaurantLambdaUrl);
-//        List<String> cuisines = new ArrayList<>();
-//        cuisines.add("test_cuisine");
-//        Restaurant defaultRestaurant = new Restaurant(1, "test", "test_address", cuisines);
-//        StringEntity restaurantEntity = new StringEntity(mapper.writeValueAsString(defaultRestaurant), ContentType.APPLICATION_JSON);
-//        postRestaurantRequest.setEntity(restaurantEntity);
-//        post(postRestaurantRequest, Restaurant.class);
-//        ResponseEntity<Restaurant> getRestaurantResponse = get(restaurantLambdaUrl + "/1", Restaurant.class);
-//        assertThat(getRestaurantResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK);
-//        assertThat(getRestaurantResponse.getBody().getName()).isEqualTo("wrong_name");
-//    }
+    @Test
+    public void testGetRestaurantRequest() throws IOException {
+        HttpPost postRestaurantRequest = new HttpPost(restaurantLambdaUrl);
+        List<String> cuisines = new ArrayList<>();
+        cuisines.add("test_cuisine");
+        Restaurant defaultRestaurant = new Restaurant(1, "test", "test_address", cuisines);
+        StringEntity restaurantEntity = new StringEntity(mapper.writeValueAsString(defaultRestaurant), ContentType.APPLICATION_JSON);
+        postRestaurantRequest.setEntity(restaurantEntity);
+        post(postRestaurantRequest, Restaurant.class);
+        ResponseEntity<Restaurant> getRestaurantResponse = get(restaurantLambdaUrl + "/1", Restaurant.class);
+        assertThat(getRestaurantResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK);
+        assertThat(getRestaurantResponse.getBody().getName()).isEqualTo("wrong_name");
+    }
 }
