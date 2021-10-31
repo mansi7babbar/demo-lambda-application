@@ -1,0 +1,64 @@
+service: demo-lambda-application
+
+plugins:
+  - serverless-deployment-bucket
+  - serverless-localstack # only activated when stage is "local"
+
+custom:
+  stage: ${opt:stage, "local"}
+  region: ${opt:region, "us-east-1"}
+  artifact: ${opt:artifact, "./target/demo-lambda-application.jar"}
+  deploymentBucketName: ${self:service}-deployment-bucket-${self:custom.stage}
+  tableName: Restaurants_Table
+  localstack:
+    stages:
+      # list of stages for which the plugin should be enabled
+      - local
+    debug: true
+    autostart: true
+
+package:
+  artifact: ${self:custom.artifact}
+
+provider:
+  name: aws
+  runtime: java8
+  stage: ${self:custom.stage}
+  region: ${self:custom.region}
+  memorySize: ${opt:memory, 512}
+  timeout: ${opt:timeout, 60}
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
+  environment:
+    RESTAURANTS_TABLE_NAME: ${self:custom.tableName}
+    THUNDRA_APIKEY: ${env:THUNDRA_APIKEY}
+    THUNDRA_AGENT_LAMBDA_REPORT_REST_BASEURL: ${env:THUNDRA_AGENT_REPORT_REST_BASEURL:"https://collector.thundra.io/v1"}
+    THUNDRA_AGENT_TRACE_INSTRUMENT_TRACEABLECONFIG: org.com.demo.lambda.*.*[traceLineByLine=true,methodModifiers=0x00000001|0x00000002]
+
+functions:
+  http_handleRestaurantRequest:
+    handler: org.com.demo.lambda.handler.RestaurantApp
+    events:
+      - http:
+          path: /restaurant
+          method: post
+      - http:
+          path: /restaurant/{restaurantid}
+          method: get
+          request:
+            parameters:
+              paths:
+                restaurantid: true
+
+resources:
+  Resources:
+    restaurantDatabase:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: N
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
